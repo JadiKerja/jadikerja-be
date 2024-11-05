@@ -59,19 +59,34 @@ export class AuthService {
           email: true,
           role: true,
           client: true,
+          partner: true,
         },
       })
 
       const accessToken = await this._generateToken(user.email, prisma)
 
-      return { accessToken, user }
+      const additionalUserInformation =
+        user.role === 'CLIENT'
+          ? { client: user.client }
+          : user.role === 'PARTNER'
+            ? { partner: user.partner }
+            : undefined
+
+      return {
+        accessToken,
+        user: {
+          email: user.email,
+          role: user.role,
+          ...additionalUserInformation,
+        },
+      }
     })
   }
 
   async basicLogin(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: { email },
-      include: { client: true },
+      include: { client: true, partner: true },
     })
 
     if (!user) {
@@ -92,9 +107,20 @@ export class AuthService {
       await this._blackListAllToken(user.email, prisma)
       const accessToken = await this._generateToken(email, prisma)
 
+      const additionalUserInformation =
+        user.role === 'CLIENT'
+          ? { client: user.client }
+          : user.role === 'PARTNER'
+            ? { partner: user.partner }
+            : undefined
+
       return {
         accessToken,
-        user: { email: user.email, role: user.role, client: user.client },
+        user: {
+          email: user.email,
+          role: user.role,
+          ...additionalUserInformation,
+        },
       }
     })
   }
@@ -110,7 +136,7 @@ export class AuthService {
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
-      select: { email: true, role: true, client: true },
+      select: { email: true, role: true, client: true, partner: true },
     })
 
     if (existingUser) {
@@ -118,7 +144,21 @@ export class AuthService {
         await this._blackListAllToken(existingUser.email, prisma)
         const accessToken = await this._generateToken(email, prisma)
 
-        return { accessToken, user: existingUser }
+        const additionalUserInformation =
+          existingUser.role === 'CLIENT'
+            ? { client: existingUser.client }
+            : existingUser.role === 'PARTNER'
+              ? { partner: existingUser.partner }
+              : undefined
+
+        return {
+          accessToken,
+          user: {
+            email: existingUser.email,
+            role: existingUser.role,
+            ...additionalUserInformation,
+          },
+        }
       })
     } else {
       return await this.prisma.$transaction(async (prisma: PrismaClient) => {
