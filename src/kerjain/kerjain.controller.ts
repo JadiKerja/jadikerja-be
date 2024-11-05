@@ -1,42 +1,104 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
+  HttpCode,
+  HttpStatus,
   Param,
-  Delete,
+  Post,
+  Query,
 } from '@nestjs/common'
 import { KerjainService } from './kerjain.service'
-import { CreateKerjainDto } from './dto/create-kerjain.dto'
-import { UpdateKerjainDto } from './dto/update-kerjain.dto'
+import { ResponseUtil } from '../common/utils/response.util'
+import { ApplyKerjainDTO } from './dto/applyKerjain.dto'
+import { GetUser } from '../common/decorators/getUser.decorator'
+import { User } from '@prisma/client'
+import { CreateKerjainDTO } from './dto/createKerjain.dto'
 
 @Controller('kerjain')
 export class KerjainController {
-  constructor(private readonly kerjainService: KerjainService) {}
+  constructor(
+    private readonly kerjainService: KerjainService,
+    private readonly responseUtil: ResponseUtil,
+  ) {}
 
-  @Post()
-  create(@Body() createKerjainDto: CreateKerjainDto) {
-    return this.kerjainService.create(createKerjainDto)
-  }
-
+  @HttpCode(HttpStatus.OK)
   @Get()
-  findAll() {
-    return this.kerjainService.findAll()
+  async getAllKerjain(@Query('search') search: string) {
+    const result = await this.kerjainService.getAllKerjain(search)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+      },
+      { kerjain: result },
+    )
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.kerjainService.findOne(+id)
+  @HttpCode(HttpStatus.CREATED)
+  @Post('/apply')
+  async applyKerjain(@GetUser() user: User, @Body() body: ApplyKerjainDTO) {
+    const result = await this.kerjainService.applyKerjain(user, body)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+        message: 'Berhasil apply KerjaIN',
+      },
+      { kerjain: result },
+    )
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateKerjainDto: UpdateKerjainDto) {
-    return this.kerjainService.update(+id, updateKerjainDto)
+  @HttpCode(HttpStatus.CREATED)
+  @Post('')
+  async createKerjain(@GetUser() user: User, @Body() body: CreateKerjainDTO) {
+    const result = await this.kerjainService.createKerjain(user, body)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+        message: 'Berhasil membuat KerjaIN',
+      },
+      { kerjain: result },
+    )
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.kerjainService.remove(+id)
+  @HttpCode(HttpStatus.OK)
+  @Get('/author')
+  async getMyKerjain(@GetUser() user: User) {
+    const result = await this.kerjainService.getMyKerjain(user)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+      },
+      { kerjain: result },
+    )
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/client')
+  async getMyAppliedKerjain(@GetUser() user: User) {
+    const result = await this.kerjainService.getMyAppliedKerjain(user)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+      },
+      { kerjain: result },
+    )
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/message/:id')
+  async getKerjainApplyMessage(@Param('id') id: string, @GetUser() user: User) {
+    const result = await this.kerjainService.getKerjainApplyMessage(id, user)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+      },
+      result,
+    )
   }
 }
