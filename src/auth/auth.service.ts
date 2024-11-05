@@ -151,6 +151,10 @@ export class AuthService {
               ? { partner: existingUser.partner }
               : undefined
 
+        if (!existingUser.client) {
+          return { accessToken, goToOnboarding: true }
+        }
+
         return {
           accessToken,
           user: {
@@ -194,9 +198,17 @@ export class AuthService {
       throw new BadRequestException('User tidak ditemukan')
     }
 
+    if (existingUser.role !== 'CLIENT') {
+      throw new BadRequestException(
+        'Hanya klien yang dapat mengakses fitur ini',
+      )
+    }
+
     const updatedUser = await this.prisma.user.update({
       where: { email: existingUser.email },
-      data: { client: { update: { ...body } } },
+      data: {
+        client: { upsert: { create: { ...body }, update: { ...body } } },
+      },
       select: { email: true, role: true, client: true },
     })
 
