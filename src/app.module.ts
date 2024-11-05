@@ -9,6 +9,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { AuthGuard } from './auth/auth.guard'
 import { KerjainModule } from './kerjain/kerjain.module'
+import { JobModule } from './job/job.module'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { KerjainModule } from './kerjain/kerjain.module'
     CommonModule,
     AuthModule,
     KerjainModule,
+    JobModule,
   ],
   controllers: [AppController],
   providers: [
