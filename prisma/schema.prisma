@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ROLE {
+  CLIENT
+  PARTNER
+  ADMIN
+}
+
+model User {
+  email     String   @id
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  role       ROLE    @default(CLIENT)
+  password   String?
+  firebaseId String? @unique
+  isBlocked  Boolean @default(false)
+
+  client  Client?
+  partner Partner?
+  tokens  Token[]
+}
+
+enum TokenStatus {
+  ACTIVE
+  BLACKLISTED
+}
+
+model Token {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  token         String      @unique
+  status        TokenStatus @default(ACTIVE)
+  expiredAt     DateTime    @db.Timestamptz()
+  blackListedAt DateTime?   @db.Timestamptz()
+
+  userEmail String
+  user      User   @relation(fields: [userEmail], references: [email])
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  fullName   String
+  birthDate  DateTime @db.Date()
+  domicile   String
+  phone      String
+  profileUrl String
+
+  kerjainPost  Kerjain[]
+  kerjainApply KerjainApply[]
+  jobApply     JobApply[]
+  userEmail    String         @unique
+  user         User           @relation(fields: [userEmail], references: [email])
+}
+
+model Partner {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  name        String
+  address     String
+  description String
+  employee    String
+
+  job       Job[]
+  userEmail String @unique
+  user      User   @relation(fields: [userEmail], references: [email])
+}
+
+model Kerjain {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  title        String
+  salary       Int
+  requirements String[]
+  mapPoint     String
+  isOpen       Boolean
+
+  kerjainApply KerjainApply[]
+  authorId     String
+  author       Client         @relation(fields: [authorId], references: [id])
+}
+
+model KerjainApply {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  bidPrice Int
+
+  kerjainApplyChat KerjainApplyChat[]
+  kerjainId        String
+  kerjain          Kerjain            @relation(fields: [kerjainId], references: [id])
+  clientId         String
+  client           Client             @relation(fields: [clientId], references: [id])
+}
+
+enum CHAT_ROLE {
+  AUTHOR
+  CLIENT
+}
+
+model KerjainApplyChat {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  role    CHAT_ROLE
+  message String
+
+  kerjainApplyId String
+  kerjainApply   KerjainApply @relation(fields: [kerjainApplyId], references: [id])
+}
+
+model Job {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  title         String
+  salary        String
+  position      String
+  scheme        String
+  qualification String
+  requirements  String[]
+  skills        String[]
+  description   String
+  isOpen        Boolean
+
+  jobApply  JobApply[]
+  partnerId String
+  partner   Partner    @relation(fields: [partnerId], references: [id])
+}
+
+model JobApply {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  fullName    String
+  phone       String
+  email       String  @unique
+  websiteUrl  String?
+  coverLetter String
+  cvUrl       String
+
+  jobId    String
+  job      Job    @relation(fields: [jobId], references: [id])
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+}
+
+model Course {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  title       String
+  description String
+  courseUrl   String
+}
