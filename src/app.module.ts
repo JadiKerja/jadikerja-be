@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module'
 import { APP_FILTER, APP_GUARD } from '@nestjs/core'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { AuthGuard } from './auth/auth.guard'
+import { KerjainModule } from './kerjain/kerjain.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthGuard } from './auth/auth.guard'
     PrismaModule,
     CommonModule,
     AuthModule,
+    KerjainModule,
   ],
   controllers: [AppController],
   providers: [
