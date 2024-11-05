@@ -94,7 +94,8 @@ model Kerjain {
   title        String
   salary       Int
   requirements String[]
-  mapPoint     String
+  lat          Int
+  lng          Int
   isOpen       Boolean
 
   kerjainApply KerjainApply[]
