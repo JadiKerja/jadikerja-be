@@ -133,6 +133,11 @@ model KerjainApplyChat {
   kerjainApply   KerjainApply @relation(fields: [kerjainApplyId], references: [id])
 }
 
+enum JOB_TYPE {
+  SPECIALIZATION
+  NOT_SPECIALIZATION
+}
+
 model Job {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @db.Timestamptz()
@@ -146,6 +151,7 @@ model Job {
   requirements  String[]
   skills        String[]
   description   String
+  type          JOB_TYPE
   isOpen        Boolean
 
   jobApply  JobApply[]
