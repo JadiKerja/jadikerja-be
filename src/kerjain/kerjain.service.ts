@@ -3,32 +3,60 @@ import { PrismaService } from '../prisma/prisma.service'
 import { ApplyKerjainDTO } from './dto/applyKerjain.dto'
 import { User } from '@prisma/client'
 import { CreateKerjainDTO } from './dto/createKerjain.dto'
+import { HttpService } from '@nestjs/axios'
 
 @Injectable()
 export class KerjainService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly httpService: HttpService,
+  ) {}
 
-  async getAllKerjain(lat: number, lng: number) {
-    if (!lat || !lng) {
-      return this.prisma.kerjain.findMany({
+  async getAllKerjain(search: string) {
+    if (!search) {
+      const kerjain = await this.prisma.kerjain.findMany({
         where: {
           isOpen: true,
         },
       })
+
+      return { kerjain }
     } else {
       const RADIUS_IN_METERS = 5000
 
-      const nearbyKerjain = await this.prisma.$queryRaw`
-      SELECT *
-      FROM "Kerjain"
-      WHERE ST_DWithin(
-        ST_Transform(ST_SetSRID(ST_MakePoint("lng"::DOUBLE PRECISION, "lat"::DOUBLE PRECISION), 4326), 3857),
-        ST_Transform(ST_SetSRID(ST_MakePoint(${lng}::DOUBLE PRECISION, ${lat}::DOUBLE PRECISION), 4326), 3857),
-        ${RADIUS_IN_METERS}
-      )
-    `
+      try {
+        const response = await this.httpService.axiosRef.get(
+          `https://maps.googleapis.com/maps/api/place/findplacefromtext/json`,
+          {
+            params: {
+              input: search,
+              inputtype: 'textquery',
+              fields: 'formatted_address,geometry',
+              key: 'AIzaSyAcRvHJpfGRPIL18NHCyKdrmc4R0oR5Zug',
+            },
+          },
+        )
 
-      return nearbyKerjain
+        const location = response.data.candidates[0].geometry.location
+
+        if (!location) {
+          throw new BadRequestException('Lokasi tidak ditemukan')
+        }
+
+        const nearbyKerjain = await this.prisma.$queryRaw`
+          SELECT *
+          FROM "Kerjain"
+          WHERE ST_DWithin(
+            ST_Transform(ST_SetSRID(ST_MakePoint("lng"::DOUBLE PRECISION, "lat"::DOUBLE PRECISION), 4326), 3857),
+            ST_Transform(ST_SetSRID(ST_MakePoint(${location.lng}::DOUBLE PRECISION, ${location.lat}::DOUBLE PRECISION), 4326), 3857),
+            ${RADIUS_IN_METERS}
+          )
+        `
+
+        return { kerjain: nearbyKerjain, searchLocation: location }
+      } catch (error) {
+        console.error(error)
+      }
     }
   }
 
@@ -139,10 +167,12 @@ export class KerjainService {
       userClient.id === kerjainApply.client.id
         ? kerjainApply.kerjain.author.profileUrl
         : kerjainApply.client.profileUrl
+    const authorEmail = kerjainApply.kerjain.author.userEmail
 
     return {
       peerName,
       peerProfileUrl,
+      authorEmail,
       message,
     }
   }

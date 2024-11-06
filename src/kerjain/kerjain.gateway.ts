@@ -11,12 +11,20 @@ import { Server, Socket } from 'socket.io'
 import { AuthWebSocketGuard } from '../auth/websocket.guard'
 import { PrismaService } from '../prisma/prisma.service'
 
+const whitelistUrls: any[] = (
+  process.env.APP_WHITELIST || 'http://localhost:3000'
+).split(',')
+
+const corsOptions = {
+  credentials: true,
+  origin: whitelistUrls,
+  methods: '*',
+}
+
 @UseGuards(AuthWebSocketGuard)
 @WebSocketGateway({
-  namespace: '/chat',
-  cors: {
-    origin: '*',
-  },
+  namespace: '/api/chat',
+  cors: corsOptions,
 })
 export class KerjainGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -43,7 +51,7 @@ export class KerjainGateway
     try {
       const roomId = client.data.roomId
 
-      const { message } = payload
+      const { id, message } = payload
 
       const kerjainApply = await this.prisma.kerjainApply.findUnique({
         where: { id: roomId },
@@ -60,7 +68,7 @@ export class KerjainGateway
           : 'AUTHOR'
 
       const chat = await this.prisma.kerjainApplyChat.create({
-        data: { message, role, kerjainApplyId: kerjainApply.id },
+        data: { id, message, role, kerjainApplyId: kerjainApply.id },
       })
 
       this.server.to(roomId).emit('chat', chat)
