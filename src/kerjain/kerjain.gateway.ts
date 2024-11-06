@@ -11,13 +11,9 @@ import { Server, Socket } from 'socket.io'
 import { AuthWebSocketGuard } from '../auth/websocket.guard'
 import { PrismaService } from '../prisma/prisma.service'
 
-const whitelistUrls: any[] = (
-  process.env.APP_WHITELIST || 'http://localhost:3000'
-).split(',')
-
 const corsOptions = {
   credentials: true,
-  origin: whitelistUrls,
+  origin: ['http://localhost:3000', 'https://jadikerja-fe.vercel.app'],
   methods: '*',
 }
 
