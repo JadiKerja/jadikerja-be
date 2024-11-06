@@ -12,7 +12,7 @@ import { AuthWebSocketGuard } from '../auth/websocket.guard'
 import { PrismaService } from '../prisma/prisma.service'
 
 const corsOptions = {
-  credentials: true,
+  credentials: false,
   origin: [
     'http://localhost:3000',
     'https://jadikerja-fe.vercel.app',
