@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator'
 
 export class CreateKerjainDTO {
   @IsString()
@@ -9,12 +9,23 @@ export class CreateKerjainDTO {
   @IsNotEmpty()
   salary: number
 
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
   @IsNotEmpty()
-  requirements: string[]
+  address: string
+
+  @IsNumber()
+  @IsNotEmpty()
+  lat: number
+
+  @IsNumber()
+  @IsNotEmpty()
+  lng: number
 
   @IsString()
   @IsNotEmpty()
-  mapPoint: string
+  contactPersonName: string
+
+  @IsString()
+  @IsNotEmpty()
+  contactPersonPhone: string
 }

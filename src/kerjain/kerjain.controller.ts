@@ -24,8 +24,8 @@ export class KerjainController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getAllKerjain(@Query('search') search: string) {
-    const result = await this.kerjainService.getAllKerjain(search)
+  async getAllKerjain(@Query('lat') lat: number, @Query('lng') lng: number) {
+    const result = await this.kerjainService.getAllKerjain(lat, lng)
 
     return this.responseUtil.response(
       {

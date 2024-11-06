@@ -8,14 +8,28 @@ import { CreateKerjainDTO } from './dto/createKerjain.dto'
 export class KerjainService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllKerjain(search: string) {
-    return this.prisma.kerjain.findMany({
-      where: {
-        isOpen: true,
-        title: search ? { contains: search, mode: 'insensitive' } : undefined,
-      },
-      include: { author: true },
-    })
+  async getAllKerjain(lat: number, lng: number) {
+    if (!lat || !lng) {
+      return this.prisma.kerjain.findMany({
+        where: {
+          isOpen: true,
+        },
+      })
+    } else {
+      const RADIUS_IN_METERS = 5000
+
+      const nearbyKerjain = await this.prisma.$queryRaw`
+      SELECT *
+      FROM "Kerjain"
+      WHERE ST_DWithin(
+        ST_Transform(ST_SetSRID(ST_MakePoint("lng"::DOUBLE PRECISION, "lat"::DOUBLE PRECISION), 4326), 3857),
+        ST_Transform(ST_SetSRID(ST_MakePoint(${lng}::DOUBLE PRECISION, ${lat}::DOUBLE PRECISION), 4326), 3857),
+        ${RADIUS_IN_METERS}
+      )
+    `
+
+      return nearbyKerjain
+    }
   }
 
   async applyKerjain(user: User, body: ApplyKerjainDTO) {
