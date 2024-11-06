@@ -21,6 +21,9 @@ const corsOptions = {
 @WebSocketGateway({
   namespace: '/api/chat',
   cors: corsOptions,
+  transports: ['websocket'],
+  pingInterval: 5000,
+  pingTimeout: 10000,
 })
 export class KerjainGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -40,6 +43,12 @@ export class KerjainGateway
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`)
+  }
+
+  @SubscribeMessage('ping') // Listen for ping messages from the client
+  handlePing(client: Socket, payload: any) {
+    console.log('Received ping from client:', payload)
+    client.emit('pong', { message: 'pong' }) // Respond with pong to keep connection alive
   }
 
   @SubscribeMessage('chat')
