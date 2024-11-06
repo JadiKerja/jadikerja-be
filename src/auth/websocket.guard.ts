@@ -23,52 +23,72 @@ export class AuthWebSocketGuard implements CanActivate {
 
     if (isPublic) return true
 
-    const client = context.switchToWs().getClient()
+    const client = context.switchToWs().getClient<Socket>()
 
     try {
       const rawToken = this.extractTokenFromHeader(client)
       if (!rawToken) {
-        throw new WsException('token not provided')
+        client.emit('error', new WsException('Token not provided'))
+        client.disconnect()
+        return false
       }
 
-      const { token, expiredAt, status, blackListedAt } =
-        await this.prisma.token.findUniqueOrThrow({
-          where: {
-            token: rawToken,
-          },
-        })
+      const tokenRecord = await this.prisma.token.findUnique({
+        where: { token: rawToken },
+      })
 
-      if (!token) {
-        throw new WsException(`Invalid Token`)
+      if (!tokenRecord) {
+        client.emit('error', new WsException('Invalid Token'))
+        client.disconnect()
+        return false
       }
+
+      const { expiredAt, status, blackListedAt } = tokenRecord
 
       if (new Date(expiredAt) < new Date()) {
-        throw new WsException('Token expired')
+        client.emit('error', new WsException('Token expired'))
+        client.disconnect()
+        return false
       }
 
       if (status === TokenStatus.BLACKLISTED) {
-        throw new WsException(
-          `Token has been blacklisted since ${blackListedAt}`,
+        client.emit(
+          'error',
+          new WsException(`Token has been blacklisted since ${blackListedAt}`),
         )
+        client.disconnect()
+        return false
       }
 
-      const { sub: email } = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET,
-      })
+      const { sub: email } = await this.jwtService.verifyAsync(
+        tokenRecord.token,
+        {
+          secret: process.env.JWT_SECRET,
+        },
+      )
 
       const user = await this.prisma.user.findUnique({
         where: { email },
         select: { email: true, role: true },
       })
+
+      if (!user) {
+        client.emit('error', new WsException('User not found'))
+        client.disconnect()
+        return false
+      }
+
       client.data.user = user
+      return true
     } catch (err) {
       if (err instanceof TokenExpiredError) {
-        client.emit('error', new WsException('token has expired'))
+        client.emit('error', new WsException('Token has expired'))
       } else {
         client.emit('error', new WsException(err.message))
       }
+      client.disconnect()
+      return false
     }
-    return true
   }
 
   private extractTokenFromHeader(client: Socket): string | undefined {

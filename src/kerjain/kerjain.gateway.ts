@@ -5,9 +5,11 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 import { AuthWebSocketGuard } from '../auth/websocket.guard'
+import { PrismaService } from '../prisma/prisma.service'
 
 @UseGuards(AuthWebSocketGuard)
 @WebSocketGateway({
@@ -19,18 +21,17 @@ import { AuthWebSocketGuard } from '../auth/websocket.guard'
 export class KerjainGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
+  constructor(private readonly prisma: PrismaService) {}
+
   @WebSocketServer() server: Server
 
   handleConnection(client: Socket) {
-    // const { payload } = client.handshake.query
+    const { roomId } = client.handshake.query
 
-    // console.log(payload, 'PAYLOADD')
-    console.log(client.handshake)
-
-    // client.join()
+    client.join(roomId)
     console.log(`Client ${client.id} joined room`)
 
-    // client.data.payload = payload
+    client.data.roomId = roomId
   }
 
   handleDisconnect(client: Socket) {
@@ -38,7 +39,33 @@ export class KerjainGateway
   }
 
   @SubscribeMessage('chat')
-  handleMessage(client: Socket, payloads: any) {
-    console.log(client.data, payloads)
+  async handleMessage(client: Socket, payload: any) {
+    try {
+      const roomId = client.data.roomId
+
+      const { message } = payload
+
+      const kerjainApply = await this.prisma.kerjainApply.findUnique({
+        where: { id: roomId },
+        include: { client: true, kerjain: { include: { author: true } } },
+      })
+
+      if (!kerjainApply) {
+        throw new WsException('KerjaIN Apply tidak ditemukan')
+      }
+
+      const role =
+        client.data.user.email === kerjainApply.client.userEmail
+          ? 'CLIENT'
+          : 'AUTHOR'
+
+      const chat = await this.prisma.kerjainApplyChat.create({
+        data: { message, role, kerjainApplyId: kerjainApply.id },
+      })
+
+      this.server.to(roomId).emit('chat', chat)
+    } catch (e) {
+      client.emit('error', e.message)
+    }
   }
 }

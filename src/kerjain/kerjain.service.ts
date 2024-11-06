@@ -122,8 +122,13 @@ export class KerjainService {
       select: { id: true, client: true, kerjain: { select: { author: true } } },
     })
 
+    if (!kerjainApply) {
+      throw new BadRequestException('KerjaIN Apply tidak ditemukan')
+    }
+
     const message = await this.prisma.kerjainApplyChat.findMany({
       where: { kerjainApplyId: kerjainApply.id },
+      orderBy: { createdAt: 'asc' },
     })
 
     const peerName =
