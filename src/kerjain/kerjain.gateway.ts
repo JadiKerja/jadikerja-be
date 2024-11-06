@@ -13,7 +13,12 @@ import { PrismaService } from '../prisma/prisma.service'
 
 const corsOptions = {
   credentials: true,
-  origin: ['http://localhost:3000', 'https://jadikerja-fe.vercel.app'],
+  origin: [
+    'http://localhost:3000',
+    'https://jadikerja-fe.vercel.app',
+    'ws://jadikerja-fe.vercel.app',
+    'wss://jadikerja-fe.vercel.app',
+  ],
   methods: '*',
 }
 
