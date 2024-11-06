@@ -21,7 +21,6 @@ const corsOptions = {
 @WebSocketGateway({
   namespace: '/api/chat',
   cors: corsOptions,
-  transports: ['websocket'],
   pingInterval: 5000,
   pingTimeout: 10000,
 })
