@@ -93,8 +93,8 @@ model Kerjain {
 
   title              String
   salary             Int
-  lat                Int
-  lng                Int
+  lat                Float
+  lng                Float
   address            String
   contactPersonName  String
   contactPersonPhone String
