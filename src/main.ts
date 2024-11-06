@@ -4,19 +4,19 @@ import { ValidationPipe } from '@nestjs/common'
 import * as admin from 'firebase-admin'
 
 async function bootstrap() {
-  const whitelistUrls: any[] = (
-    process.env.APP_WHITELIST || 'http://localhost:3000'
-  ).split(',')
+  // const whitelistUrls: any[] = (
+  //   process.env.APP_WHITELIST || 'http://localhost:3000'
+  // ).split(',')
 
-  const corsOptions = {
-    credentials: true,
-    origin: whitelistUrls,
-    methods: '*',
-  }
+  // const corsOptions = {
+  //   credentials: true,
+  //   origin: whitelistUrls,
+  //   methods: '*',
+  // }
 
   const app = await NestFactory.create(AppModule)
   app.setGlobalPrefix('api')
-  app.enableCors(corsOptions)
+  // app.enableCors(corsOptions)
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
