@@ -14,6 +14,11 @@ import { PrismaService } from '../prisma/prisma.service'
 @UseGuards(AuthWebSocketGuard)
 @WebSocketGateway({
   namespace: '/api/chat',
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: false,
+  },
 })
 export class KerjainGateway
   implements OnGatewayConnection, OnGatewayDisconnect
