@@ -11,21 +11,9 @@ import { Server, Socket } from 'socket.io'
 import { AuthWebSocketGuard } from '../auth/websocket.guard'
 import { PrismaService } from '../prisma/prisma.service'
 
-const corsOptions = {
-  credentials: false,
-  origin: [
-    'http://localhost:3000',
-    'https://jadikerja-fe.vercel.app',
-    'ws://jadikerja-fe.vercel.app',
-    'wss://jadikerja-fe.vercel.app',
-  ],
-  methods: '*',
-}
-
 @UseGuards(AuthWebSocketGuard)
 @WebSocketGateway({
   namespace: '/api/chat',
-  cors: corsOptions,
 })
 export class KerjainGateway
   implements OnGatewayConnection, OnGatewayDisconnect
