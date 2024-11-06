@@ -91,12 +91,14 @@ model Kerjain {
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
 
-  title        String
-  salary       Int
-  requirements String[]
-  lat          Int
-  lng          Int
-  isOpen       Boolean
+  title              String
+  salary             Int
+  lat                Int
+  lng                Int
+  address            String
+  contactPersonName  String
+  contactPersonPhone String
+  isOpen             Boolean
 
   kerjainApply KerjainApply[]
   authorId     String
