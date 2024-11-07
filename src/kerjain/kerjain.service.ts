@@ -5,6 +5,7 @@ import { User } from '@prisma/client'
 import { CreateKerjainDTO } from './dto/createKerjain.dto'
 import { HttpService } from '@nestjs/axios'
 import { MarkDoneKerjainDTO } from './dto/markDoneKerjain.dto'
+import { UpdateKerjainDTO } from './dto/updateKerjain.dto'
 
 @Injectable()
 export class KerjainService {
@@ -122,6 +123,15 @@ export class KerjainService {
 
     return await this.prisma.kerjain.create({
       data: { authorId: author.id, isOpen: true, ...body },
+    })
+  }
+
+  async updateKerjain(body: UpdateKerjainDTO) {
+    const { id, ...restBody } = body
+
+    return await this.prisma.kerjain.update({
+      where: { id },
+      data: { ...restBody },
     })
   }
 

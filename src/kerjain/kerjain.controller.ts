@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   Query,
 } from '@nestjs/common'
 import { KerjainService } from './kerjain.service'
@@ -15,6 +16,7 @@ import { GetUser } from '../common/decorators/getUser.decorator'
 import { User } from '@prisma/client'
 import { CreateKerjainDTO } from './dto/createKerjain.dto'
 import { MarkDoneKerjainDTO } from './dto/markDoneKerjain.dto'
+import { UpdateKerjainDTO } from './dto/updateKerjain.dto'
 
 @Controller('kerjain')
 export class KerjainController {
@@ -59,6 +61,20 @@ export class KerjainController {
       {
         code: HttpStatus.OK,
         message: 'Berhasil membuat KerjaIN',
+      },
+      { kerjain: result },
+    )
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Put('')
+  async updateKerjain(@Body() body: UpdateKerjainDTO) {
+    const result = await this.kerjainService.updateKerjain(body)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+        message: 'Berhasil mengubah KerjaIN',
       },
       { kerjain: result },
     )
