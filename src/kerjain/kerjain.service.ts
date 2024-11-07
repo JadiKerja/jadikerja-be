@@ -152,6 +152,7 @@ export class KerjainService {
 
     return await this.prisma.kerjainApply.findMany({
       where: { clientId: userClient.id },
+      include: { kerjain: true },
     })
   }
 
