@@ -14,6 +14,7 @@ import { ApplyKerjainDTO } from './dto/applyKerjain.dto'
 import { GetUser } from '../common/decorators/getUser.decorator'
 import { User } from '@prisma/client'
 import { CreateKerjainDTO } from './dto/createKerjain.dto'
+import { MarkDoneKerjainDTO } from './dto/markDoneKerjain.dto'
 
 @Controller('kerjain')
 export class KerjainController {
@@ -99,6 +100,20 @@ export class KerjainController {
         code: HttpStatus.OK,
       },
       result,
+    )
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Post('mark-as-done')
+  async markDoneKerjain(@Body() body: MarkDoneKerjainDTO) {
+    const result = await this.kerjainService.markDoneKerjain(body)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+        message: 'KerjaIN ditutup',
+      },
+      { kerjain: result },
     )
   }
 

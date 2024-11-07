@@ -4,6 +4,7 @@ import { ApplyKerjainDTO } from './dto/applyKerjain.dto'
 import { User } from '@prisma/client'
 import { CreateKerjainDTO } from './dto/createKerjain.dto'
 import { HttpService } from '@nestjs/axios'
+import { MarkDoneKerjainDTO } from './dto/markDoneKerjain.dto'
 
 @Injectable()
 export class KerjainService {
@@ -80,6 +81,10 @@ export class KerjainService {
       throw new BadRequestException(
         'Anda tidak bisa melamar di KerjaIN anda sendiri.',
       )
+    }
+
+    if (!kerjain.isOpen) {
+      throw new BadRequestException('KerjaIN sudah ditutup')
     }
 
     const existingApply = await this.prisma.kerjainApply.findFirst({
@@ -175,6 +180,13 @@ export class KerjainService {
       authorEmail,
       message,
     }
+  }
+
+  async markDoneKerjain(body: MarkDoneKerjainDTO) {
+    return await this.prisma.kerjain.update({
+      where: { id: body.id },
+      data: { isOpen: false },
+    })
   }
 
   async getKerjainDetail(id: string) {
