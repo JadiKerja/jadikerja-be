@@ -44,7 +44,9 @@ export class OpenaiService {
 
       Analisis Tren: Evaluasi faktor ekonomi dan sosial yang mempengaruhi pasar kerja di Jakarta, termasuk pengaruh industri yang sedang tumbuh atau menurun.
       Potensi Pertumbuhan Karir: Jelaskan potensi pertumbuhan jangka panjang di setiap peran atau industri yang disarankan berdasarkan tren saat ini (contoh, "Karena pertumbuhan pesat e-commerce, peran logistik dan rantai pasokan diperkirakan akan tetap tinggi permintaannya dalam 5 tahun ke depan").
-      Catatan Penting: Fokus pada rekomendasi yang aplikatif dan hindari memberikan penjelasan HR umum kecuali diminta secara khusus. Sesuaikan saran untuk membantu pencari kerja membuat keputusan yang tepat di pasar kerja Jakarta berdasarkan data yang diberikan`,
+      Catatan Penting: Fokus pada rekomendasi yang aplikatif dan hindari memberikan penjelasan HR umum kecuali diminta secara khusus. Sesuaikan saran untuk membantu pencari kerja membuat keputusan yang tepat di pasar kerja Jakarta berdasarkan data yang diberikan.
+      
+      Jawab dengan nada profesional dan berikan jawaban yang jelas dan langsung ke intinya. Hindari memberikan penjelasan tambahan kecuali diminta`,
         },
         ...messages,
       ] as { role: 'system' | 'user' | 'assistant'; content: string }[]
