@@ -45,7 +45,7 @@ export class KerjainController {
 
     return this.responseUtil.response(
       {
-        code: HttpStatus.OK,
+        code: HttpStatus.CREATED,
         message: 'Berhasil apply KerjaIN',
       },
       { kerjain: result },
@@ -59,7 +59,7 @@ export class KerjainController {
 
     return this.responseUtil.response(
       {
-        code: HttpStatus.OK,
+        code: HttpStatus.CREATED,
         message: 'Berhasil membuat KerjaIN',
       },
       { kerjain: result },
@@ -126,7 +126,7 @@ export class KerjainController {
 
     return this.responseUtil.response(
       {
-        code: HttpStatus.OK,
+        code: HttpStatus.CREATED,
         message: 'KerjaIN ditutup',
       },
       { kerjain: result },
