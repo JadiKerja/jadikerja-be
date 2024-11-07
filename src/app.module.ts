@@ -10,6 +10,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { AuthGuard } from './auth/auth.guard'
 import { KerjainModule } from './kerjain/kerjain.module'
 import { JobModule } from './job/job.module'
+import { OpenaiModule } from './openai/openai.module'
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { JobModule } from './job/job.module'
     AuthModule,
     KerjainModule,
     JobModule,
+    OpenaiModule,
   ],
   controllers: [AppController],
   providers: [
