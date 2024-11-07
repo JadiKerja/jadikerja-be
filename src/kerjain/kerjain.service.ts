@@ -176,4 +176,11 @@ export class KerjainService {
       message,
     }
   }
+
+  async getKerjainDetail(id: string) {
+    return await this.prisma.kerjain.findUnique({
+      where: { id },
+      include: { kerjainApply: { select: { client: true } } },
+    })
+  }
 }

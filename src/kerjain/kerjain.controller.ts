@@ -101,4 +101,17 @@ export class KerjainController {
       result,
     )
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/:id')
+  async getKerjainDetail(@Param('id') id: string) {
+    const result = await this.kerjainService.getKerjainDetail(id)
+
+    return this.responseUtil.response(
+      {
+        code: HttpStatus.OK,
+      },
+      { kerjain: result },
+    )
+  }
 }
